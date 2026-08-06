@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RODEO — Administración</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#F4F1EA;--navy:#0F2847;--navy-2:#1B3A5F;--gold:#C8A24A;--tinta:#12202F;--gris:#6C7480;--linea:#D9D3C6;--error:#A63D2F}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper); color:var(--tinta); font-family:'Archivo',system-ui,sans-serif}
+  header{background:var(--navy); color:var(--paper); padding:0 18px; height:56px; display:flex; align-items:center; gap:16px}
+  .marca{font-family:'Fraunces',serif; font-style:italic; font-weight:600; font-size:20px}
+  .breadcrumb{font-size:11px; letter-spacing:1.6px; text-transform:uppercase; color:rgba(244,241,234,.55); font-weight:600}
+  header a{margin-left:auto; color:rgba(244,241,234,.7); font-size:11px; letter-spacing:1.2px; text-transform:uppercase; text-decoration:none; font-weight:600}
+  header a:hover{color:var(--gold)}
+  nav{display:flex; gap:2px; padding:0 18px; border-bottom:1px solid var(--linea); background:var(--paper)}
+  nav button{background:none;border:0;padding:13px 18px 11px;font-family:'Archivo',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gris);cursor:pointer;border-bottom:2px solid transparent}
+  nav button.activo{color:var(--navy); border-bottom-color:var(--gold)}
+  main{padding:24px 18px; max-width:1180px; margin:0 auto}
+  section{display:none} section.activo{display:block}
+  h2{font-family:'Fraunces',serif; font-weight:600; font-size:20px; margin-bottom:14px}
+  table{width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--linea); margin-bottom:26px}
+  th{background:#EAE5DA; text-align:left; font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--gris); padding:9px 11px; font-weight:700}
+  td{padding:9px 11px; border-top:1px solid var(--linea); font-size:14px; vertical-align:top}
+  td.mono{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--gris)}
+  .chip{display:inline-block; font-size:9px; letter-spacing:1.1px; font-weight:700; padding:2px 6px; border-radius:2px; background:var(--gold); color:var(--navy); margin-right:4px}
+  .chip.gris{background:#DDD8CC; color:var(--gris)}
+  .ficha{background:#fff; border:1px solid var(--linea); padding:20px; margin-bottom:26px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:12px 16px}
+  label{display:block; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gris); font-weight:600; margin-bottom:5px}
+  input,select{width:100%; padding:9px 10px; border:1px solid var(--linea); border-radius:3px; background:#fff; font-family:'Archivo',sans-serif; font-size:14px; color:var(--tinta)}
+  input:focus,select:focus{outline:none; border-color:var(--navy)}
+  button.accion{background:var(--navy); color:var(--paper); border:0; border-radius:3px; padding:10px 20px; font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; cursor:pointer; margin-top:16px}
+  button.accion:hover{background:var(--navy-2)}
+  button.mini{background:none; border:1px solid var(--linea); border-radius:3px; padding:4px 9px; font-size:11px; cursor:pointer; font-family:'Archivo',sans-serif; color:var(--gris)}
+  button.mini:hover{border-color:var(--navy); color:var(--navy)}
+  .msg{font-size:13px; padding:10px 12px; border-radius:3px; margin-bottom:14px; display:none}
+  .msg.err{background:#F6E6E2; color:var(--error); border-left:3px solid var(--error); display:block}
+  .msg.ok{background:#E7EFE4; color:#3D6B33; border-left:3px solid #3D6B33; display:block}
+  .orgs-check{display:flex; flex-wrap:wrap; gap:10px; margin-top:6px}
+  .orgs-check label{display:flex; align-items:center; gap:6px; text-transform:none; letter-spacing:0; font-size:13px; color:var(--tinta); font-weight:400; margin:0}
+  .orgs-check input[type=checkbox]{width:auto}
+  .orgs-check select{width:auto; padding:4px 6px; font-size:12px}
+  .nota{font-size:12px; color:var(--gris); line-height:1.6; margin-bottom:16px}
+</style>
+</head>
+<body>
+<header>
+  <div class="marca">RODEO</div>
+  <div class="breadcrumb">Administración</div>
+  <a href="/app">← Volver</a>
+</header>
+
+<nav>
+  <button data-s="orgs" class="activo">Organizaciones</button>
+  <button data-s="usuarios">Usuarios</button>
+  <button data-s="cotiz">Cotizaciones</button>
+</nav>
+
+<main>
+  <div class="msg" id="msg"></div>
+
+  <section id="s-orgs" class="activo">
+    <h2>Organizaciones</h2>
+    <p class="nota">Cada organización es un cliente: tiene su sistema ganadero, su sistema financiero, su esquema (AR/UY) y su número de WhatsApp.</p>
+    <table><thead><tr>
+      <th>Nombre</th><th>Razón social</th><th>Esquema</th><th>Ganadero</th><th>Financiero</th><th>WhatsApp</th><th></th>
+    </tr></thead><tbody id="tb-orgs"></tbody></table>
+
+    <div class="ficha">
+      <h2 id="org-titulo">Nueva organización</h2>
+      <div class="grid">
+        <div><label>Nombre (cabaña / establecimiento)</label><input id="o-nombre"></div>
+        <div><label>Razón social (empresa financiera)</label><input id="o-razon"></div>
+        <div><label>Esquema</label><select id="o-esquema"><option value="UY">Uruguay</option><option value="AR">Argentina</option></select></div>
+        <div><label>Tipo de código</label><select id="o-codtipo"><option value="DICOSE">DICOSE</option><option value="RENSPA">RENSPA</option></select></div>
+        <div><label>Código</label><input id="o-codigo"></div>
+        <div><label>WhatsApp</label><input id="o-whatsapp" placeholder="whatsapp:+598..."></div>
+        <div><label>Backend ganadero (URL)</label><input id="o-ganurl"></div>
+        <div><label>Clave de campo ganadero</label><input id="o-gancampo"></div>
+        <div><label>Frontend ganadero (URL)</label><input id="o-ganfront"></div>
+        <div><label>Backend financiero (URL)</label><input id="o-finurl"></div>
+        <div><label>Clave de empresa financiera</label><input id="o-finempresa"></div>
+        <div><label>Frontend financiero (URL)</label><input id="o-finfront"></div>
+      </div>
+      <button class="accion" id="btn-org">Guardar organización</button>
+      <button class="mini" id="btn-org-cancel" style="margin-left:10px; display:none">Cancelar edición</button>
+    </div>
+  </section>
+
+  <section id="s-usuarios">
+    <h2>Usuarios</h2>
+    <p class="nota">Un usuario puede tener acceso a una o varias organizaciones, con un rol distinto en cada una. ADMIN gestiona todo, OPERADOR carga datos, LECTURA solo consulta.</p>
+    <table><thead><tr>
+      <th>Nombre</th><th>Email</th><th>Organizaciones</th><th>Último ingreso</th><th>Estado</th><th></th>
+    </tr></thead><tbody id="tb-usuarios"></tbody></table>
+
+    <div class="ficha">
+      <h2 id="u-titulo">Nuevo usuario</h2>
+      <div class="grid">
+        <div><label>Nombre</label><input id="u-nombre"></div>
+        <div><label>Email</label><input id="u-email" autocapitalize="off" spellcheck="false"></div>
+        <div><label>Teléfono (WhatsApp)</label><input id="u-telefono" placeholder="+5989..."></div>
+        <div><label>Contraseña inicial</label><input id="u-pass" type="text" placeholder="mínimo 6 caracteres"></div>
+      </div>
+      <div style="margin-top:14px">
+        <label>Acceso a organizaciones</label>
+        <div class="orgs-check" id="u-orgs"></div>
+      </div>
+      <button class="accion" id="btn-usuario">Guardar usuario</button>
+      <button class="mini" id="btn-usuario-cancel" style="margin-left:10px; display:none">Cancelar edición</button>
+    </div>
+  </section>
+
+  <section id="s-cotiz">
+    <h2>Cotizaciones — US$ / kg de novillo</h2>
+    <p class="nota">La moneda de trabajo es el dólar. Este valor permite expresar cualquier monto en kilos de carne, que es la unidad real del negocio.</p>
+    <div class="ficha">
+      <div class="grid">
+        <div><label>Fecha</label><input id="c-fecha" type="date"></div>
+        <div><label>Esquema</label><select id="c-esquema"><option value="UY">Uruguay</option><option value="AR">Argentina</option></select></div>
+        <div><label>US$ por kg de novillo</label><input id="c-kg" type="number" step="0.01" placeholder="4.15"></div>
+        <div><label>Tipo de cambio local</label><input id="c-tc" type="number" step="0.01"></div>
+        <div><label>Fuente</label><input id="c-fuente" placeholder="INAC / Cañuelas / manual"></div>
+      </div>
+      <button class="accion" id="btn-cotiz">Guardar cotización</button>
+    </div>
+    <table><thead><tr><th>Fecha</th><th>Esquema</th><th>US$/kg</th><th>TC local</th><th>Fuente</th></tr></thead>
+    <tbody id="tb-cotiz"></tbody></table>
+  </section>
+</main>
+
+<script>
+const API = location.origin;
+const $ = id => document.getElementById(id);
+const token = localStorage.getItem("plat_token");
+if(!token) location.href = "/";
+const H = { "Content-Type":"application/json", "Authorization":"Bearer " + token };
+let orgs = [], editandoOrg = null, editandoUsuario = null;
+
+function msg(t, tipo){
+  const m = $("msg");
+  if(!t){ m.className = "msg"; m.textContent = ""; return; }
+  m.className = "msg " + (tipo || "err"); m.textContent = t;
+  window.scrollTo({ top:0, behavior:"smooth" });
+  if(tipo === "ok") setTimeout(() => msg(""), 3500);
+}
+
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("activo", x === b));
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("activo", s.id === "s-" + b.dataset.s));
+});
+
+// ── ORGANIZACIONES ──
+async function cargarOrgs(){
+  const r = await fetch(API + "/api/admin/orgs", { headers: H });
+  if(r.status === 403){ msg("Tu usuario no es superadmin."); return; }
+  orgs = await r.json();
+  $("tb-orgs").innerHTML = orgs.map(o => `
+    <tr>
+      <td><strong>${o.nombre}</strong><br><span class="mono">${o.slug}</span></td>
+      <td>${o.razon_social || "—"}</td>
+      <td><span class="chip">${o.esquema}</span><span class="chip gris">${o.codigo_tipo || ""} ${o.codigo || ""}</span></td>
+      <td class="mono">${o.gan_campo || "—"}</td>
+      <td class="mono">${o.fin_empresa || "—"}</td>
+      <td class="mono">${o.whatsapp || "—"}</td>
+      <td><button class="mini" data-edit="${o.id}">Editar</button></td>
+    </tr>`).join("");
+  $("tb-orgs").querySelectorAll("[data-edit]").forEach(b => b.onclick = () => editarOrg(+b.dataset.edit));
+  pintarChecksOrgs();
+}
+
+function editarOrg(id){
+  const o = orgs.find(x => x.id === id);
+  editandoOrg = id;
+  $("org-titulo").textContent = "Editar: " + o.nombre;
+  $("o-nombre").value = o.nombre || ""; $("o-razon").value = o.razon_social || "";
+  $("o-esquema").value = o.esquema || "UY"; $("o-codtipo").value = o.codigo_tipo || "DICOSE";
+  $("o-codigo").value = o.codigo || ""; $("o-whatsapp").value = o.whatsapp || "";
+  $("o-ganurl").value = o.gan_url || ""; $("o-gancampo").value = o.gan_campo || ""; $("o-ganfront").value = o.gan_frontend || "";
+  $("o-finurl").value = o.fin_url || ""; $("o-finempresa").value = o.fin_empresa || ""; $("o-finfront").value = o.fin_frontend || "";
+  $("btn-org-cancel").style.display = "inline-block";
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+function limpiarOrg(){
+  editandoOrg = null;
+  $("org-titulo").textContent = "Nueva organización";
+  ["o-nombre","o-razon","o-codigo","o-whatsapp","o-ganurl","o-gancampo","o-ganfront","o-finurl","o-finempresa","o-finfront"].forEach(i => $(i).value = "");
+  $("btn-org-cancel").style.display = "none";
+}
+$("btn-org-cancel").onclick = limpiarOrg;
+
+$("btn-org").onclick = async () => {
+  const datos = {
+    nombre: $("o-nombre").value.trim(), razon_social: $("o-razon").value.trim(),
+    esquema: $("o-esquema").value, pais: $("o-esquema").value,
+    codigo_tipo: $("o-codtipo").value, codigo: $("o-codigo").value.trim(),
+    whatsapp: $("o-whatsapp").value.trim(),
+    gan_url: $("o-ganurl").value.trim(), gan_campo: $("o-gancampo").value.trim(), gan_frontend: $("o-ganfront").value.trim(),
+    fin_url: $("o-finurl").value.trim(), fin_empresa: $("o-finempresa").value.trim(), fin_frontend: $("o-finfront").value.trim()
+  };
+  if(!datos.nombre) return msg("Falta el nombre.");
+  const r = await fetch(API + (editandoOrg ? "/api/admin/orgs/" + editandoOrg : "/api/admin/orgs"),
+    { method: editandoOrg ? "PUT" : "POST", headers: H, body: JSON.stringify(datos) });
+  const d = await r.json();
+  if(!r.ok) return msg(d.error || "Error");
+  msg("Organización guardada.", "ok"); limpiarOrg(); cargarOrgs();
+};
+
+// ── USUARIOS ──
+function pintarChecksOrgs(){
+  $("u-orgs").innerHTML = orgs.map(o => `
+    <label>
+      <input type="checkbox" data-org="${o.slug}"> ${o.nombre}
+      <select data-rol="${o.slug}">
+        <option value="OPERADOR">Operador</option>
+        <option value="ADMIN">Admin</option>
+        <option value="LECTURA">Lectura</option>
+      </select>
+    </label>`).join("");
+}
+
+async function cargarUsuarios(){
+  const r = await fetch(API + "/api/admin/usuarios", { headers: H });
+  if(!r.ok) return;
+  const us = await r.json();
+  $("tb-usuarios").innerHTML = us.map(u => `
+    <tr>
+      <td><strong>${u.nombre || "—"}</strong>${u.es_superadmin ? ' <span class="chip">SUPER</span>' : ""}</td>
+      <td class="mono">${u.email}</td>
+      <td>${u.organizaciones.map(o => `<span class="chip gris">${o.nombre} · ${o.rol}</span>`).join(" ") || "—"}</td>
+      <td class="mono">${u.ultimo_login || "nunca"}</td>
+      <td>${u.estado}</td>
+      <td><button class="mini" data-eu='${JSON.stringify(u).replace(/'/g,"&#39;")}'>Editar</button></td>
+    </tr>`).join("");
+  $("tb-usuarios").querySelectorAll("[data-eu]").forEach(b => b.onclick = () => editarUsuario(JSON.parse(b.dataset.eu)));
+}
+
+function editarUsuario(u){
+  editandoUsuario = u.id;
+  $("u-titulo").textContent = "Editar: " + (u.nombre || u.email);
+  $("u-nombre").value = u.nombre || ""; $("u-email").value = u.email; $("u-email").disabled = true;
+  $("u-telefono").value = u.telefono || ""; $("u-pass").value = ""; $("u-pass").placeholder = "dejar vacío para no cambiar";
+  $("u-orgs").querySelectorAll("[data-org]").forEach(chk => {
+    const rel = u.organizaciones.find(o => o.slug === chk.dataset.org);
+    chk.checked = !!rel;
+    if(rel) $("u-orgs").querySelector(`[data-rol="${chk.dataset.org}"]`).value = rel.rol;
+  });
+  $("btn-usuario-cancel").style.display = "inline-block";
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+function limpiarUsuario(){
+  editandoUsuario = null;
+  $("u-titulo").textContent = "Nuevo usuario";
+  ["u-nombre","u-email","u-telefono","u-pass"].forEach(i => $(i).value = "");
+  $("u-email").disabled = false; $("u-pass").placeholder = "mínimo 6 caracteres";
+  $("u-orgs").querySelectorAll("[data-org]").forEach(c => c.checked = false);
+  $("btn-usuario-cancel").style.display = "none";
+}
+$("btn-usuario-cancel").onclick = limpiarUsuario;
+
+$("btn-usuario").onclick = async () => {
+  const organizaciones = [];
+  $("u-orgs").querySelectorAll("[data-org]").forEach(chk => {
+    if(chk.checked) organizaciones.push({ slug: chk.dataset.org, rol: $("u-orgs").querySelector(`[data-rol="${chk.dataset.org}"]`).value });
+  });
+  const datos = {
+    nombre: $("u-nombre").value.trim(), email: $("u-email").value.trim(),
+    telefono: $("u-telefono").value.trim(), organizaciones
+  };
+  if($("u-pass").value) datos.password = $("u-pass").value;
+  if(!editandoUsuario && (!datos.email || !datos.password)) return msg("Email y contraseña inicial obligatorios.");
+  const r = await fetch(API + (editandoUsuario ? "/api/admin/usuarios/" + editandoUsuario : "/api/admin/usuarios"),
+    { method: editandoUsuario ? "PUT" : "POST", headers: H, body: JSON.stringify(datos) });
+  const d = await r.json();
+  if(!r.ok) return msg(d.error || "Error");
+  msg("Usuario guardado.", "ok"); limpiarUsuario(); cargarUsuarios();
+};
+
+// ── COTIZACIONES ──
+async function cargarCotiz(){
+  const r = await fetch(API + "/api/cotizaciones", { headers: H });
+  if(!r.ok) return;
+  const cs = await r.json();
+  $("tb-cotiz").innerHTML = cs.map(c => `
+    <tr><td class="mono">${c.fecha}</td><td><span class="chip">${c.esquema}</span></td>
+    <td class="mono">${c.usd_kg_novillo}</td><td class="mono">${c.tc_local || "—"}</td><td>${c.fuente || "—"}</td></tr>`).join("");
+}
+
+$("btn-cotiz").onclick = async () => {
+  const datos = {
+    fecha: $("c-fecha").value || new Date().toISOString().slice(0,10),
+    esquema: $("c-esquema").value,
+    usd_kg_novillo: parseFloat($("c-kg").value),
+    tc_local: parseFloat($("c-tc").value) || null,
+    fuente: $("c-fuente").value.trim()
+  };
+  if(!(datos.usd_kg_novillo > 0)) return msg("Cargá el valor US$/kg.");
+  const r = await fetch(API + "/api/cotizaciones", { method:"POST", headers: H, body: JSON.stringify(datos) });
+  const d = await r.json();
+  if(!r.ok) return msg(d.error || "Error");
+  msg("Cotización guardada.", "ok"); cargarCotiz();
+};
+
+$("c-fecha").value = new Date().toISOString().slice(0,10);
+(async () => { await cargarOrgs(); await cargarUsuarios(); await cargarCotiz(); })();
+</script>
+</body>
+</html>

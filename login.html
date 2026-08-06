@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RODEO — Ingresar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F1EA; --navy:#0F2847; --navy-2:#1B3A5F; --gold:#C8A24A;
+    --tinta:#12202F; --gris:#6C7480; --linea:#D9D3C6; --error:#A63D2F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh; background:var(--navy); color:var(--tinta);
+    font-family:'Archivo',system-ui,sans-serif;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background-image:radial-gradient(circle at 20% 10%, #1B3A5F 0%, #0F2847 55%, #0A1B31 100%);
+  }
+  .caja{width:100%; max-width:400px}
+  .marca{text-align:center; margin-bottom:28px}
+  .marca .nombre{
+    font-family:'Fraunces',serif; font-style:italic; font-weight:600;
+    font-size:38px; color:var(--paper); letter-spacing:.5px; line-height:1;
+  }
+  .marca .bajada{
+    font-size:11px; letter-spacing:3px; text-transform:uppercase;
+    color:var(--gold); margin-top:10px; font-weight:600;
+  }
+  .tarjeta{background:var(--paper); border-radius:4px; padding:32px 28px; box-shadow:0 20px 50px rgba(0,0,0,.35)}
+  .tarjeta h1{font-family:'Fraunces',serif; font-weight:600; font-size:21px; margin-bottom:4px}
+  .tarjeta p.sub{font-size:13px; color:var(--gris); margin-bottom:24px}
+  label{display:block; font-size:10px; letter-spacing:1.6px; text-transform:uppercase; color:var(--gris); font-weight:600; margin-bottom:6px}
+  input{
+    width:100%; padding:11px 12px; border:1px solid var(--linea); border-radius:3px;
+    background:#fff; font-family:'Archivo',sans-serif; font-size:15px; color:var(--tinta); margin-bottom:16px;
+  }
+  input:focus{outline:none; border-color:var(--navy); box-shadow:0 0 0 3px rgba(15,40,71,.08)}
+  button{
+    width:100%; padding:12px; background:var(--navy); color:var(--paper); border:0; border-radius:3px;
+    font-family:'Archivo',sans-serif; font-size:13px; font-weight:600; letter-spacing:1.2px;
+    text-transform:uppercase; cursor:pointer; transition:background .15s;
+  }
+  button:hover{background:var(--navy-2)}
+  button:disabled{opacity:.55; cursor:default}
+  .msg{font-size:13px; padding:10px 12px; border-radius:3px; margin-bottom:16px; display:none}
+  .msg.err{background:#F6E6E2; color:var(--error); border-left:3px solid var(--error); display:block}
+  .msg.ok{background:#E7EFE4; color:#3D6B33; border-left:3px solid #3D6B33; display:block}
+  .pie{text-align:center; margin-top:20px; font-size:11px; color:rgba(244,241,234,.45); letter-spacing:.5px}
+  .linea-oro{height:2px; width:44px; background:var(--gold); margin:0 auto 18px}
+</style>
+</head>
+<body>
+<div class="caja">
+  <div class="marca">
+    <div class="nombre" id="marca">RODEO</div>
+    <div class="bajada">Gestión ganadera y financiera</div>
+  </div>
+
+  <div class="tarjeta">
+    <div class="linea-oro"></div>
+    <h1 id="titulo">Ingresar</h1>
+    <p class="sub" id="subtitulo">Usá tu usuario y contraseña.</p>
+    <div class="msg" id="msg"></div>
+
+    <div id="form-login">
+      <label for="email">Email</label>
+      <input type="email" id="email" autocomplete="username" autocapitalize="off" spellcheck="false">
+      <label for="pass">Contraseña</label>
+      <input type="password" id="pass" autocomplete="current-password">
+      <button id="btn">Entrar</button>
+    </div>
+
+    <div id="form-cambio" style="display:none">
+      <label for="nueva">Contraseña nueva</label>
+      <input type="password" id="nueva" autocomplete="new-password">
+      <label for="nueva2">Repetir contraseña</label>
+      <input type="password" id="nueva2" autocomplete="new-password">
+      <button id="btn-cambio">Guardar y continuar</button>
+    </div>
+  </div>
+
+  <div class="pie">Acceso privado · Todos los movimientos quedan registrados</div>
+</div>
+
+<script>
+const API = location.origin;
+const $ = id => document.getElementById(id);
+let passActual = "";
+
+function msg(texto, tipo){
+  const m = $("msg");
+  m.className = "msg " + (tipo || "err");
+  m.textContent = texto;
+  if(!texto) m.className = "msg";
+}
+
+async function entrar(){
+  const email = $("email").value.trim();
+  const password = $("pass").value;
+  if(!email || !password) return msg("Completá email y contraseña.");
+  $("btn").disabled = true; $("btn").textContent = "Entrando…"; msg("");
+  try{
+    const r = await fetch(API + "/api/auth/login", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ email, password })
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error || "No pude entrar");
+    localStorage.setItem("plat_token", d.token);
+    localStorage.setItem("plat_usuario", JSON.stringify(d.usuario));
+    localStorage.setItem("plat_orgs", JSON.stringify(d.organizaciones));
+    if(d.usuario.debe_cambiar_pass){
+      passActual = password;
+      $("form-login").style.display = "none";
+      $("form-cambio").style.display = "block";
+      $("titulo").textContent = "Elegí tu contraseña";
+      $("subtitulo").textContent = "Es tu primer ingreso. Definí una contraseña propia.";
+      msg("");
+      return;
+    }
+    location.href = "/app";
+  }catch(e){
+    msg(e.message);
+  }finally{
+    $("btn").disabled = false; $("btn").textContent = "Entrar";
+  }
+}
+
+async function cambiar(){
+  const nueva = $("nueva").value, nueva2 = $("nueva2").value;
+  if(nueva.length < 6) return msg("Mínimo 6 caracteres.");
+  if(nueva !== nueva2) return msg("Las contraseñas no coinciden.");
+  $("btn-cambio").disabled = true;
+  try{
+    const r = await fetch(API + "/api/auth/password", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Authorization":"Bearer " + localStorage.getItem("plat_token") },
+      body: JSON.stringify({ actual: passActual, nueva })
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error || "Error");
+    location.href = "/app";
+  }catch(e){
+    msg(e.message);
+    $("btn-cambio").disabled = false;
+  }
+}
+
+$("btn").onclick = entrar;
+$("btn-cambio").onclick = cambiar;
+["email","pass"].forEach(id => $(id).addEventListener("keydown", e => { if(e.key === "Enter") entrar(); }));
+["nueva","nueva2"].forEach(id => $(id).addEventListener("keydown", e => { if(e.key === "Enter") cambiar(); }));
+
+// Si ya hay sesión válida, pasar directo
+(async () => {
+  const t = localStorage.getItem("plat_token");
+  if(!t) return;
+  try{
+    const r = await fetch(API + "/api/auth/me", { headers:{ "Authorization":"Bearer " + t }});
+    if(r.ok) location.href = "/app";
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
