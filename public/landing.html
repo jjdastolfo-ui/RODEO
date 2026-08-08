@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RODEO — Gestión de campo y administración en un solo lugar</title>
+<meta name="description" content="Cargá el rodeo y la plata por WhatsApp. Pesadas, tactos, pariciones, gastos y cuentas corrientes en un sistema, con la misma cuenta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F2847;
+  --navy-2:#16355C;
+  --paper:#F4F1EA;
+  --paper-2:#EAE5DA;
+  --gold:#C69A3F;
+  --ink:#1A1D21;
+  --muted:#5E6672;
+  --line:#D8D2C4;
+  --verde:#3F7D5C;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:'Archivo',system-ui,sans-serif;font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif;font-weight:600;line-height:1.12;margin:0}
+.mono{font-family:'JetBrains Mono',monospace}
+.wrap{width:min(1120px,92vw);margin:0 auto}
+a{color:inherit}
+
+/* ── barra ───────────────────────────────────────────────────────────── */
+.barra{
+  position:sticky;top:0;z-index:50;background:var(--navy);color:var(--paper);
+  border-bottom:1px solid rgba(244,241,234,.12);
+}
+.barra .wrap{display:flex;align-items:center;gap:18px;height:62px}
+.logo{font-family:'Fraunces',serif;font-size:23px;letter-spacing:.08em;font-weight:600}
+.logo b{color:var(--gold);font-weight:600}
+.barra nav{margin-left:auto;display:flex;align-items:center;gap:26px;font-size:14px}
+.barra nav a{text-decoration:none;opacity:.82}
+.barra nav a:hover{opacity:1}
+.btn-entrar{
+  border:1px solid rgba(244,241,234,.35);border-radius:2px;padding:9px 18px;
+  text-decoration:none;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+}
+.btn-entrar:hover{background:var(--paper);color:var(--navy);border-color:var(--paper)}
+@media(max-width:760px){.barra nav a.oculta-movil{display:none}}
+
+/* ── hero ────────────────────────────────────────────────────────────── */
+.hero{background:var(--navy);color:var(--paper);padding:68px 0 78px;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:20px;
+}
+.hero h1{font-size:clamp(38px,5vw,62px);font-style:italic}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p.bajada{font-size:18px;color:rgba(244,241,234,.78);margin:22px 0 32px;max-width:46ch}
+.acciones{display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-block;text-decoration:none;border-radius:2px;padding:14px 26px;
+  font-size:14px;font-weight:600;letter-spacing:.04em;border:1px solid transparent;
+}
+.btn-oro{background:var(--gold);color:var(--navy)}
+.btn-oro:hover{background:#D8AC50}
+.btn-linea{border-color:rgba(244,241,234,.4);color:var(--paper)}
+.btn-linea:hover{border-color:var(--paper)}
+
+/* ── el chat: la pieza central ───────────────────────────────────────── */
+.tel{
+  background:#E9E3D8;border-radius:14px;padding:16px 14px 20px;
+  box-shadow:0 30px 70px rgba(0,0,0,.42);border:1px solid rgba(0,0,0,.14);
+}
+.tel-top{
+  display:flex;align-items:center;gap:9px;padding:0 4px 13px;
+  border-bottom:1px solid rgba(0,0,0,.09);margin-bottom:15px;
+}
+.tel-av{width:31px;height:31px;border-radius:50%;background:var(--navy);color:var(--gold);
+  display:grid;place-items:center;font-size:15px}
+.tel-nom{font-weight:700;font-size:14px;color:#111}
+.tel-est{font-size:10px;color:var(--verde);font-family:'JetBrains Mono',monospace}
+.msj{max-width:82%;padding:9px 13px;border-radius:9px;font-size:13.5px;line-height:1.45;
+  margin-bottom:9px;opacity:0;animation:entra .5s ease forwards}
+.msj.yo{background:#D6EDC6;margin-left:auto;border-bottom-right-radius:2px}
+.msj.bot{background:#fff;border-bottom-left-radius:2px}
+.msj .tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;
+  display:block;margin-bottom:3px;opacity:.55}
+.msj.gan .tag{color:var(--verde)}
+.msj.fin .tag{color:var(--gold)}
+@keyframes entra{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.msj:nth-child(2){animation-delay:.15s}
+.msj:nth-child(3){animation-delay:.5s}
+.msj:nth-child(4){animation-delay:.9s}
+.msj:nth-child(5){animation-delay:1.3s}
+.msj:nth-child(6){animation-delay:1.7s}
+.pie-tel{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);
+  text-align:center;margin-top:14px;letter-spacing:.04em}
+@media(max-width:900px){
+  .hero .wrap{grid-template-columns:1fr;gap:44px}
+  .hero{padding:48px 0 56px}
+}
+
+/* ── secciones ───────────────────────────────────────────────────────── */
+section{padding:82px 0}
+.rotulo{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:14px;
+  display:flex;align-items:center;gap:11px;
+}
+.rotulo::after{content:'';height:1px;flex:1;background:var(--line)}
+h2{font-size:clamp(28px,3.4vw,40px);font-style:italic;margin-bottom:16px}
+.intro{color:var(--muted);max-width:62ch;font-size:17px}
+
+/* ── módulos ─────────────────────────────────────────────────────────── */
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:44px}
+.modulo{background:#fff;border:1px solid var(--line);padding:32px 30px}
+.modulo h3{font-size:23px;margin-bottom:6px}
+.modulo .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.modulo ul{list-style:none;padding:0;margin:0}
+.modulo li{padding:9px 0 9px 20px;position:relative;font-size:15px;border-top:1px solid var(--paper-2)}
+.modulo li:first-child{border-top:none}
+.modulo li::before{content:'—';position:absolute;left:0;color:var(--line)}
+.modulo li b{font-weight:600}
+@media(max-width:820px){.dos{grid-template-columns:1fr;gap:22px}}
+
+/* ── cómo funciona ───────────────────────────────────────────────────── */
+.pasos{margin-top:46px;border-top:1px solid var(--line)}
+.paso{display:grid;grid-template-columns:88px 1fr;gap:28px;padding:28px 0;border-bottom:1px solid var(--line)}
+.paso .n{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);letter-spacing:.14em;padding-top:5px}
+.paso h3{font-size:20px;margin-bottom:7px}
+.paso p{margin:0;color:var(--muted);max-width:64ch}
+@media(max-width:640px){.paso{grid-template-columns:1fr;gap:6px}}
+
+/* ── franja oscura ───────────────────────────────────────────────────── */
+.franja{background:var(--navy);color:var(--paper)}
+.franja .rotulo{color:rgba(244,241,234,.5)}
+.franja .rotulo::after{background:rgba(244,241,234,.2)}
+.franja .intro{color:rgba(244,241,234,.72)}
+.tres{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(244,241,234,.16);
+  margin-top:44px;border:1px solid rgba(244,241,234,.16)}
+.celda{background:var(--navy);padding:28px 24px}
+.celda h3{font-size:19px;margin-bottom:9px}
+.celda p{margin:0;font-size:14.5px;color:rgba(244,241,234,.72)}
+@media(max-width:820px){.tres{grid-template-columns:1fr}}
+
+/* ── planes ──────────────────────────────────────────────────────────── */
+.planes{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px}
+.plan{border:1px solid var(--line);background:#fff;padding:30px 28px;position:relative}
+.plan .moneda{font-family:'Fraunces',serif;font-style:italic;font-size:34px;color:var(--navy);margin-bottom:4px}
+.plan .quien{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.plan p{margin:0 0 14px;font-size:15px;color:var(--muted)}
+.plan .detalle{font-size:14px;border-top:1px solid var(--paper-2);padding-top:14px;margin-top:4px}
+@media(max-width:820px){.planes{grid-template-columns:1fr}}
+
+/* ── alta ────────────────────────────────────────────────────────────── */
+.alta{background:var(--paper-2);border-top:1px solid var(--line)}
+.form-caja{background:#fff;border:1px solid var(--line);padding:38px 36px;margin-top:38px}
+.campos{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.campo{display:flex;flex-direction:column;gap:7px}
+.campo.ancho{grid-column:1/-1}
+label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+input,select,textarea{
+  font-family:'Archivo',sans-serif;font-size:15px;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:12px 13px;
+  width:100%;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(15,40,71,.09)}
+textarea{resize:vertical;min-height:78px}
+.ayuda{font-size:12.5px;color:var(--muted)}
+.eleccion{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.opcion{border:1px solid var(--line);background:var(--paper);padding:16px 17px;cursor:pointer;display:block}
+.opcion input{display:none}
+.opcion .t{font-weight:700;font-size:15px;margin-bottom:3px}
+.opcion .d{font-size:13px;color:var(--muted)}
+.opcion:has(input:checked){border-color:var(--navy);background:#fff;box-shadow:inset 0 0 0 1px var(--navy)}
+.opcion:focus-within{box-shadow:0 0 0 3px rgba(15,40,71,.12)}
+@media(max-width:700px){.campos,.eleccion{grid-template-columns:1fr}}
+.enviar{
+  background:var(--navy);color:var(--paper);border:none;border-radius:2px;
+  padding:15px 34px;font-family:'Archivo',sans-serif;font-size:14.5px;font-weight:600;
+  letter-spacing:.04em;cursor:pointer;margin-top:26px;
+}
+.enviar:hover{background:var(--navy-2)}
+.enviar:disabled{opacity:.55;cursor:default}
+.aviso{margin-top:16px;font-size:14px;padding:13px 15px;border-radius:2px;display:none}
+.aviso.error{display:block;background:#FBEAEA;color:#8C2F2F;border:1px solid #E9C4C4}
+.aviso.ok{display:block;background:#E8F1EA;color:#25603F;border:1px solid #BFD8C8}
+
+/* ── pie ─────────────────────────────────────────────────────────────── */
+footer{background:var(--navy);color:rgba(244,241,234,.62);padding:38px 0;font-size:13.5px}
+footer .wrap{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+footer .logo{font-size:19px;color:var(--paper)}
+footer .der{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.06em}
+</style>
+</head>
+<body>
+
+<div class="barra">
+  <div class="wrap">
+    <div class="logo">RO<b>D</b>EO</div>
+    <nav>
+      <a href="#sistema" class="oculta-movil">Qué hace</a>
+      <a href="#funciona" class="oculta-movil">Cómo funciona</a>
+      <a href="#alta">Crear cuenta</a>
+      <a href="/entrar" class="btn-entrar">Entrar</a>
+    </nav>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Ganadería · Uruguay y Argentina</div>
+      <h1>El campo se carga <em>hablando</em>.</h1>
+      <p class="bajada">
+        Un WhatsApp por establecimiento. Le escribís una pesada y va al rodeo;
+        le escribís una factura y va a la contabilidad. El mismo número, el mismo
+        sistema, la misma cuenta.
+      </p>
+      <div class="acciones">
+        <a href="#alta" class="btn btn-oro">Crear mi cuenta</a>
+        <a href="#sistema" class="btn btn-linea">Ver qué hace</a>
+      </div>
+    </div>
+
+    <div>
+      <div class="tel">
+        <div class="tel-top">
+          <div class="tel-av">🐄</div>
+          <div>
+            <div class="tel-nom">RODEO · Las Tranqueras</div>
+            <div class="tel-est">en línea</div>
+          </div>
+        </div>
+        <div class="msj yo">Destete del 412, 198 kilos</div>
+        <div class="msj bot gan">
+          <span class="tag">🐄 RODEO</span>
+          Anotado. RP 412, destete 198 kg.<br>GDP 0,712 desde el nacimiento.
+        </div>
+        <div class="msj yo">Pagué 48.000 de ración a Cereales del Este</div>
+        <div class="msj bot fin">
+          <span class="tag">💵 RODEO</span>
+          Egreso cargado: $48.000 · RACIÓN.<br>Cuenta corriente actualizada.
+        </div>
+        <div class="msj yo">¿Cuántas preñadas tengo?</div>
+        <div class="msj bot gan">
+          <span class="tag">🐄 RODEO</span>
+          186 preñadas de 214 servidas — 86,9%.<br>Primer parto estimado: 12/09.
+        </div>
+        <div class="pie-tel">un solo número · dos sistemas</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="sistema">
+  <div class="wrap">
+    <div class="rotulo">Los dos sistemas</div>
+    <h2>Todo lo del campo, en un lugar</h2>
+    <p class="intro">
+      La mayoría de los sistemas hacen una sola mitad: o llevan el rodeo, o llevan la plata.
+      Acá van juntos, así el gasto y el animal viven en el mismo lado y podés saber
+      cuánto te costó producir un kilo.
+    </p>
+
+    <div class="dos">
+      <div class="modulo">
+        <div class="sub">Módulo ganadero</div>
+        <h3>El rodeo</h3>
+        <ul>
+          <li><b>Inventario</b> por caravana, chip y RP, con madre, padre y registro (PP, SA, general).</li>
+          <li><b>Pesadas</b> de nacimiento, destete, año, 18 meses y adulta, con GDP calculado solo.</li>
+          <li><b>Servicios y tactos</b>: IATF, repaso con toro, resultado y fecha probable de parto.</li>
+          <li><b>Pariciones</b> con asignación automática del padre según la fecha.</li>
+          <li><b>Sanidad</b> por animal o por lote, con historial completo.</li>
+          <li><b>Medidas</b> de circunferencia escrotal, altura, condición corporal y docilidad.</li>
+          <li><b>Lotes y potreros</b>, con movimientos y carga por hectárea.</li>
+          <li><b>Importación</b> desde balanzas Gallagher y exportación a INIA y BREEDPLAN.</li>
+        </ul>
+      </div>
+
+      <div class="modulo">
+        <div class="sub">Módulo financiero</div>
+        <h3>La administración</h3>
+        <ul>
+          <li><b>Ingresos y egresos</b> por concepto, proveedor y campo.</li>
+          <li><b>Cuentas corrientes</b> de proveedores, con saldo real y pagos aplicados.</li>
+          <li><b>Cheques</b> emitidos y recibidos, con vencimientos a la vista.</li>
+          <li><b>Flujo de caja</b> mensual y comparación contra presupuesto.</li>
+          <li><b>Socios e inversores</b>, aportes y dividendos.</li>
+          <li><b>Órdenes de trabajo y stock</b> de insumos.</li>
+          <li><b>Costeo por kilo producido</b>, con amortización de los animales.</li>
+          <li><b>Ventas</b> que cierran la operación completa en un solo movimiento.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="franja" id="funciona">
+  <div class="wrap">
+    <div class="rotulo">Cómo funciona</div>
+    <h2>De la manga al balance, sin planilla intermedia</h2>
+    <p class="intro">
+      El problema no es que falten sistemas: es que nadie carga datos cuando está
+      con las botas puestas. Por eso la carga entra por donde ya estás mirando.
+    </p>
+
+    <div class="pasos" style="border-color:rgba(244,241,234,.2)">
+      <div class="paso" style="border-color:rgba(244,241,234,.2)">
+        <div class="n">EN EL CAMPO</div>
+        <div>
+          <h3>Le escribís al WhatsApp del establecimiento</h3>
+          <p style="color:rgba(244,241,234,.72)">
+            En castellano, como le hablarías a un encargado. Sin menús ni códigos.
+            Podés mandar varias cosas en un mismo mensaje y las carga todas.
+          </p>
+        </div>
+      </div>
+      <div class="paso" style="border-color:rgba(244,241,234,.2)">
+        <div class="n">AL INSTANTE</div>
+        <div>
+          <h3>El sistema decide adónde va</h3>
+          <p style="color:rgba(244,241,234,.72)">
+            Una pesada va al rodeo, una factura va a la contabilidad. Si el mensaje
+            puede ser de los dos lados, pregunta antes de guardar cualquier cosa.
+          </p>
+        </div>
+      </div>
+      <div class="paso" style="border-color:rgba(244,241,234,.2)">
+        <div class="n">EN LA OFICINA</div>
+        <div>
+          <h3>Entrás por la web y está todo</h3>
+          <p style="color:rgba(244,241,234,.72)">
+            Mismo usuario y clave. Planillas, gráficos, informes en PDF y los
+            formularios de INIA y BREEDPLAN listos para presentar.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tres">
+      <div class="celda">
+        <h3>Cada uno ve lo suyo</h3>
+        <p>Le das acceso al capataz, al contador o al veterinario, con el rol que
+        corresponda. El de sólo lectura no puede tocar nada.</p>
+      </div>
+      <div class="celda">
+        <h3>Varios establecimientos</h3>
+        <p>Si manejás más de un campo, entrás una vez y cambiás de uno a otro
+        desde arriba. Los datos de cada uno quedan separados.</p>
+      </div>
+      <div class="celda">
+        <h3>Uruguay y Argentina</h3>
+        <p>DICOSE o RENSPA, según dónde estés. Cada país con sus categorías,
+        sus registros y sus formularios.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="rotulo">En qué moneda trabajás</div>
+    <h2>Elegí cómo querés mirar los números</h2>
+    <p class="intro">
+      Es la única decisión que tenés que tomar al empezar, y se puede cambiar después.
+      Define en qué unidad se guardan y se muestran los importes de todo el sistema.
+    </p>
+
+    <div class="planes">
+      <div class="plan">
+        <div class="moneda">US$</div>
+        <div class="quien">Dólares</div>
+        <p>Todo se registra y se informa en dólares. Es lo habitual cuando la
+        referencia del negocio es la moneda dura y los costos se comparan año contra año.</p>
+        <div class="detalle">Incluye el módulo ganadero completo y el financiero.</div>
+      </div>
+      <div class="plan">
+        <div class="moneda">kg</div>
+        <div class="quien">Kilos de carne</div>
+        <p>Los importes se expresan en kilos de novillo. Un gasto de mil dólares
+        es tantos kilos, y esa referencia no se mueve cuando se mueve el tipo de cambio.</p>
+        <div class="detalle">
+          Incluye el módulo ganadero completo y el financiero.
+          <b>La conversión a kilos está en desarrollo</b> — se activa apenas esté lista.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alta" id="alta">
+  <div class="wrap">
+    <div class="rotulo">Crear cuenta</div>
+    <h2>Contanos de tu campo</h2>
+    <p class="intro">
+      Dejás los datos y te escribimos para dar de alta el establecimiento y el número
+      de WhatsApp. Preferimos hacerlo así, hablando, para cargarte bien el rodeo desde
+      el arranque en vez de dejarte solo con una pantalla vacía.
+    </p>
+
+    <div class="form-caja">
+      <div class="campos">
+        <div class="campo">
+          <label for="f-nombre">Tu nombre</label>
+          <input id="f-nombre" autocomplete="name">
+        </div>
+        <div class="campo">
+          <label for="f-empresa">Establecimiento o empresa</label>
+          <input id="f-empresa" autocomplete="organization">
+        </div>
+        <div class="campo">
+          <label for="f-email">Email</label>
+          <input id="f-email" type="email" autocomplete="email">
+        </div>
+        <div class="campo">
+          <label for="f-tel">Celular con código de país</label>
+          <input id="f-tel" type="tel" placeholder="+598 99 123 456" autocomplete="tel">
+          <span class="ayuda">Es el número que va a poder cargar datos por WhatsApp.</span>
+        </div>
+        <div class="campo">
+          <label for="f-pais">País</label>
+          <select id="f-pais">
+            <option value="UY">Uruguay</option>
+            <option value="AR">Argentina</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="f-animales">Cuántos animales manejás</label>
+          <select id="f-animales">
+            <option value="">Prefiero no decir</option>
+            <option>Hasta 200</option>
+            <option>200 a 800</option>
+            <option>800 a 2000</option>
+            <option>Más de 2000</option>
+          </select>
+        </div>
+
+        <div class="campo ancho">
+          <label>En qué moneda vas a trabajar</label>
+          <div class="eleccion">
+            <label class="opcion">
+              <input type="radio" name="plan" value="usd" checked>
+              <div class="t">Dólares + ganadero</div>
+              <div class="d">Importes en US$. Rodeo y administración.</div>
+            </label>
+            <label class="opcion">
+              <input type="radio" name="plan" value="kg">
+              <div class="t">Kilos de carne + ganadero</div>
+              <div class="d">Importes en kg de novillo. Rodeo y administración.</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="campo ancho">
+          <label for="f-msj">Algo que quieras contarnos (opcional)</label>
+          <textarea id="f-msj" placeholder="Cabaña, invernada, cría, mixto… cómo llevás los datos hoy."></textarea>
+        </div>
+      </div>
+
+      <button class="enviar" id="btn-enviar">Crear mi cuenta</button>
+      <div class="aviso" id="aviso"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logo">RO<b style="color:var(--gold)">D</b>EO</div>
+    <div>Gestión ganadera y administración de campo</div>
+    <div class="der"><a href="/entrar" style="text-decoration:none">ENTRAR AL SISTEMA →</a></div>
+  </div>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const aviso = $("aviso");
+
+function mostrar(tipo, texto){
+  aviso.className = "aviso " + tipo;
+  aviso.textContent = texto;
+}
+
+$("btn-enviar").addEventListener("click", async () => {
+  const datos = {
+    nombre:   $("f-nombre").value.trim(),
+    empresa:  $("f-empresa").value.trim(),
+    email:    $("f-email").value.trim(),
+    telefono: $("f-tel").value.trim(),
+    pais:     $("f-pais").value,
+    animales: $("f-animales").value,
+    plan:     document.querySelector('input[name="plan"]:checked').value,
+    mensaje:  $("f-msj").value.trim()
+  };
+
+  const btn = $("btn-enviar");
+  btn.disabled = true;
+  btn.textContent = "Enviando…";
+
+  try {
+    const r = await fetch("/api/registro", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos)
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error || "No se pudo enviar");
+
+    document.querySelector(".form-caja").innerHTML =
+      '<h3 style="font-size:26px;margin-bottom:12px">Listo, ' + (datos.nombre.split(" ")[0] || "") + '.</h3>' +
+      '<p style="color:var(--muted);max-width:52ch;margin:0">' +
+      'Nos quedó tu solicitud para <b>' + datos.empresa.replace(/</g,"&lt;") + '</b>. ' +
+      'Te escribimos al ' + datos.telefono.replace(/</g,"&lt;") + ' para dar de alta el campo ' +
+      'y dejarte el WhatsApp andando.</p>';
+    document.querySelector(".form-caja").scrollIntoView({ block:"center" });
+
+  } catch(e) {
+    mostrar("error", e.message);
+    btn.disabled = false;
+    btn.textContent = "Crear mi cuenta";
+  }
+});
+</script>
+</body>
+</html>
